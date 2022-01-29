@@ -1,10 +1,10 @@
 package leylashakirzyanova.todo
 
 import android.content.Intent
-import androidx.appcompat.app.AppCompatActivity
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
 import org.apache.commons.io.FileUtils
@@ -32,12 +32,25 @@ class MainActivity : AppCompatActivity() {
             }
         }
 
+        val onClickListener = object : TaskItemAdapter.OnClickListener {
+            override fun onItemClicked(position: Int) {
+                val REQUEST_CODE = 20
+
+                // first parameter is the context, second is the class of the activity to launch
+                val i = Intent(this@MainActivity, EditActivity::class.java)
+                i.putExtra("position", position)
+                i.putExtra("task", listOfTasks[position])
+                startActivityForResult(i, REQUEST_CODE) // brings up the second activity
+            }
+        }
+
+
         loadItems()
 
         // Look up the RecyclerView in the layout
         val recyclerView = findViewById<RecyclerView>(R.id.recyclerView)
         // Create adapter passing in the sample user data
-        adapter = TaskItemAdapter(listOfTasks, onLongClickListener)
+        adapter = TaskItemAdapter(listOfTasks, onLongClickListener, onClickListener)
         // Attach the adapter to the recyclerview to populate items
         recyclerView.adapter = adapter
         // Set layout manager to position the items
@@ -74,7 +87,7 @@ class MainActivity : AppCompatActivity() {
     fun loadItems() {
         try {
             listOfTasks = FileUtils.readLines(getDataFile(), Charset.defaultCharset())
-        } catch (ioException : IOException) {
+        } catch (ioException: IOException) {
             ioException.printStackTrace()
         }
     }
@@ -83,7 +96,7 @@ class MainActivity : AppCompatActivity() {
     fun saveItems() {
         try {
             FileUtils.writeLines(getDataFile(), listOfTasks)
-        } catch (ioException : IOException) {
+        } catch (ioException: IOException) {
             ioException.printStackTrace()
         }
 

@@ -11,24 +11,33 @@ import androidx.recyclerview.widget.RecyclerView
  */
 
 class TaskItemAdapter(val listOfItems: List<String>,
-                      val longClickListener: OnLongClickListener) :
+                      val longClickListener: OnLongClickListener,
+                      val shortClickListener: OnClickListener) :
     RecyclerView.Adapter<TaskItemAdapter.ViewHolder>(){
 
     interface OnLongClickListener {
         fun onItemLongClicked(position: Int)
     }
 
+    interface OnClickListener {
+        fun onItemClicked(position: Int)
+    }
+
     // Provide a direct reference to each of the views within a data item
     // Used to cache the views within the item layout for fast access
     inner class ViewHolder(itemView: View) : RecyclerView.ViewHolder(itemView) {
         // Store references to elements in layout view
-        val textView: TextView
+        val textView: TextView = itemView.findViewById(android.R.id.text1)
 
         init {
-            textView = itemView.findViewById(android.R.id.text1)
 
             itemView.setOnLongClickListener{
                 longClickListener.onItemLongClicked(adapterPosition)
+                true
+            }
+
+            itemView.setOnClickListener{
+                shortClickListener.onItemClicked(adapterPosition)
                 true
             }
         }
