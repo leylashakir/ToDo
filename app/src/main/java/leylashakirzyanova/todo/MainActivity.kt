@@ -1,9 +1,12 @@
 package leylashakirzyanova.todo
 
+import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
 import android.widget.Button
 import android.widget.EditText
+import androidx.activity.result.ActivityResult
+import androidx.activity.result.contract.ActivityResultContracts.StartActivityForResult
 import androidx.appcompat.app.AppCompatActivity
 import androidx.recyclerview.widget.LinearLayoutManager
 import androidx.recyclerview.widget.RecyclerView
@@ -16,6 +19,19 @@ class MainActivity : AppCompatActivity() {
 
     var listOfTasks = mutableListOf<String>()
     lateinit var adapter: TaskItemAdapter
+
+    val startForResult = registerForActivityResult(StartActivityForResult()) { result: ActivityResult ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            val bundle = result.data
+            val name = bundle?.getStringExtra("edited task").toString()
+            val position = bundle?.getIntExtra("position", 0)
+            if (position != null && name != null) {
+                listOfTasks[position] = name
+                adapter.notifyDataSetChanged()
+                saveItems()
+            }
+        }
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,16 +50,13 @@ class MainActivity : AppCompatActivity() {
 
         val onClickListener = object : TaskItemAdapter.OnClickListener {
             override fun onItemClicked(position: Int) {
-                val REQUEST_CODE = 20
-
-                // first parameter is the context, second is the class of the activity to launch
                 val i = Intent(this@MainActivity, EditActivity::class.java)
+                val taskToEdit = listOfTasks[position]
+                i.putExtra("task", taskToEdit)
                 i.putExtra("position", position)
-                i.putExtra("task", listOfTasks[position])
-                startActivityForResult(i, REQUEST_CODE) // brings up the second activity
+                startForResult.launch(i)
             }
         }
-
 
         loadItems()
 
